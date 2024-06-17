@@ -1,0 +1,25 @@
+#include "rwmake.ch"       
+
+User Function 479mod()     
+
+SetPrvt("_AMODEL,")
+
+/////  PROGRAMA PARA INDICAR A MODALIDADE DO PAGAMENTO POS.140-142 (Boston)
+
+_aModel := "   "
+
+If SEA->EA_PORTADO == "479"
+
+   If Substr(SEA->EA_MODELO,1,2) == "01"
+      _aModel := "CC "
+   Elseif Substr(SEA->EA_MODELO,1,2) == "02"   
+      _aModel := "CHQ"
+   Elseif Substr(SEA->EA_MODELO,1,2) == "03"   
+      _aModel := "DOC"
+   Elseif Substr(SEA->EA_MODELO,1,2) == "31"   
+      _aModel := "COB"
+   Endif
+
+Endif   
+     
+Return(_aModel)      

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="AdvPL.launchType">
+<stringAttribute key="ADVPLInternalServer" value="FALSE"/>
+<stringAttribute key="ADVPLLembranca" value="TRUE"/>
+<stringAttribute key="ADVPLParameters" value=""/>
+<stringAttribute key="ADVPLProfile" value="TRUE"/>
+<stringAttribute key="ADVPLRadio" value="FALSE"/>
+<stringAttribute key="ADVPLRemoteDirectory" value="P:\MP11\Protheus11\bin\SmarClient 11\Smartclient.exe"/>
+<stringAttribute key="ADVPLRemoteParameters" value="-M"/>
+<stringAttribute key="ADVPLStartProgram" value="SIGAFAT"/>
+<booleanAttribute key="coverage.hascoverage" value="false"/>
+<listAttribute key="coverage.listsourcecoverage"/>
+</launchConfiguration>

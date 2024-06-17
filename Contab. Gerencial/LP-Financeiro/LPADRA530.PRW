@@ -1,0 +1,19 @@
+User Function LPADRA530(cLanc) 
+
+
+Local nReturn:=0
+
+If cLanc $ "530-001"
+   nReturn:= IIF(ALLTRIM(SE2->E2_NATUREZ)$"02011/02012/02095/02052/02105".AND.SE2->E2_FATURA$"          /NOTFAT   ".AND.EMPTY(SE2->E2_IDENTEE),SE2->E2_VALLIQ-SE2->E2_MULTA-SE2->E2_JUROS,0)
+EndIf
+
+
+If cLanc $ "530-019"
+   nReturn:=IIF( TRIM(SE2->E2_NATUREZ) $ "02048/02058/02097/02096/02032/02015/02016/02109/02065/02005/02006/02008/02061/02107/02056/02073/02136/02089/02121/02049/02152" .AND. SE2->E2_FATURA $ "         /NOTFAT   ",SE2->(E2_VALLIQ-E2_MULTA-E2_JUROS),0)    
+Endif                                                                 
+
+
+Return(nReturn)
+
+
+

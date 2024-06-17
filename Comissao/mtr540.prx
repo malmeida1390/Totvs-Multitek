@@ -1,0 +1,705 @@
+#INCLUDE "MATR540.CH"
+#INCLUDE "FIVEWIN.CH"
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATR540  ³ Autor ³ Claudinei M. Benzi       ³ Data ³ 13.04.92 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Relatorio de Comissoes.                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Sintaxe   ³ MATR540(void)                                                 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                      ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±± 
+±±ÚÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³ DATA   ³ BOPS ³Programad.³ALTERACAO                                      ³±±
+±±ÃÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³05.02.03³XXXXXX³Eduardo Ju³Inclusao de Queries para filtros em TOPCONNECT.³±±
+±±ÀÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+User Function Mtr540()
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local wnrel
+Local titulo    := "Relatorio de Comissoes - Vendedores Internos/Externos"
+Local cDesc1    := "Emissao do relatorio de Comissoes - Vendedores."
+Local tamanho   := "G"
+Local limite    := 220
+Local cString   := "SE3"
+Local cAliasAnt := Alias()
+Local cOrdemAnt := IndexOrd()
+Local nRegAnt   := Recno()
+Private aReturn := { OemToAnsi(STR0003), 1,OemToAnsi(STR0004), 1, 2, 1, "",1 }  //"Zebrado"###"Administracao"
+Private nomeprog:= "MATR540"
+Private aLinha  := { },nLastKey := 0
+Private cPerg   := "MTK540"+SPACE(4)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Verifica as perguntas selecionadas                           ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Pergunte("MTK540",.F.)
+
+
+wnrel := "MTR540"
+wnrel := SetPrint(cString,wnrel,cPerg,titulo,cDesc1,"","",.F.,"",.F.,Tamanho)
+
+If nLastKey==27
+	Set Filter to
+	Return
+Endif
+SetDefault(aReturn,cString)
+If nLastKey ==27
+	Set Filter to
+	Return
+Endif
+
+RptStatus({|lEnd| C540Imp(@lEnd,wnRel,cString)},Titulo)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Retorna para area anterior, indice anterior e registro ant.  ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+DbSelectArea(caliasAnt)
+DbSetOrder(cOrdemAnt)
+DbGoto(nRegAnt)
+Return
+
+/*ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ C540IMP  ³ Autor ³ Rosane Luciane Chene  ³ Data ³ 09.11.95 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³ Chamada do Relatorio                                       ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ MATR540		                                              ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß*/
+Static Function C540Imp(lEnd,WnRel,cString)
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local CbCont,cabec1,cabec2
+Local tamanho  := "G"
+Local limite   := 220
+Local nomeprog := "MATR540"
+Local imprime  := .T.
+Local cPict    := ""
+Local cTexto,j :=0,nTipo:=0
+Local cCodAnt,nCol:=0
+
+Local nGIrr :=0,nGVen:=0
+Local nAIrr :=0,nAVen:=0
+
+Local nGTtot:=0,nTtot :=0   // Total dos Titulos (Somatoria do valor dos Titulos)
+
+Local nGBtot :=0,nBtot:=0   // Total de Base      (Sem Adiantametno, Sem Devulucao)
+Local nGBdia :=0,nBdia:=0   // Total de Base      (Somente Adiantamento)
+Local nGBDev :=0,nBDev:=0   // Total de Base      (Somente Devolucao)
+
+Local nGCtot :=0,nCtot:=0   // Total de Comissao  (Sem Adiantametno, Sem Devulucao)
+Local nGCdia :=0,nCdia:=0   // Tital de Comissao  (Somente Adianamento)
+Local nGCDev :=0,nCDev:=0   // Total de Comissao  (Somente Devolucao)
+
+
+Local lFirstV:=.T.
+Local nTregs,nMult,nAnt,nAtu,nCnt,cSav20,cSav7
+Local lContinua:= .T.
+Local cNFiscal :=""
+Local aCampos  :={}
+Local lImpDev  := .F.
+Local cBase    := ""
+Local cNomArq, cCondicao, cFilialSE1, cFilialSE3, cChave, cFiltroUsu
+Local nDecs    := GetMv("MV_CENT")
+Local nBasePrt :=0, nComPrt:=0 
+Local aStru    := SE3->(dbStruct()), ni
+Local _aAreaAt := GetArea()
+
+Local naliqirr := 0
+Local nVendPag := 1
+
+Local	lIrrf    := .F.
+Local lImp     := .F.
+Local	nIrrf    := 0
+Local nImp     := 0
+Local cCodCli   := ""
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para Impressao do Cabecalho e Rodape    ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+cbtxt    := Space(10)
+cbcont   := 00
+li       := 80
+m_pag    := 01
+imprime  := .T.
+
+nTipo := IIF(aReturn[4]==1,15,18)
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Definicao dos cabecalhos                                     ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+titulo := OemToAnsi(STR0008)+ " - " + GetMv("MV_MOEDA1")  //"RELATORIO DE COMISSOES"
+
+
+cabec1:="PRF NUMERO   PARC. CODIGO DO   LJ    NOME                                           DATA                 DT.BASE      DATA      DATA              VALOR      %         VALOR      TIPO      FILIAL" 
+cabec2:="    TITULO         CLIENTE                                                          EMISSAO              COMISSAO     VENCTO    PAGTO             BASE                 COMISSAO   COMISSAO  ORIGEM"
+       //          10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220
+       //01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+       //                                                                                   XXXXXXXXXXXXXXXXXXXX                                  xxxxxxxxxxxxxx          xxxxxxxxxxxxxx      x         xx
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Monta condicao para filtro do arquivo de trabalho            ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+DbSelectArea("SE3")	// Posiciona no arquivo de comissoes
+_aAreaE3 := GetArea()
+DbSetOrder(4)	    // Por Vendedor, Nao considera Filial.
+//cFilialSE3 := xFilial()
+cNomArq :=CriaTrab("",.F.)                          
+
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Cria expressao de filtro do usuario                          ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If ( ! Empty(aReturn[7]) )
+	cFiltroUsu := &("{ || " + aReturn[7] +  " }")
+Else
+	cFiltroUsu := { || .t. }
+Endif
+
+nGBdia := nGCtot := 0
+
+#IFDEF TOP
+	If TcSrvType() != "AS/400"
+
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ mv_par01        	// Tipo de Vendedor     (Interno)            ³
+		//³ mv_par02        	// Emissao de                                ³
+		//³ mv_par03        	// Ate a Emissao                             ³
+		//³ mv_par04        	// Vencimento de                             ³
+		//³ mv_par05        	// Vencimento Ate                            ³
+		//³ mv_par06        	// Vendedor                                  ³
+		//³ mv_par07        	// Ate a Vendedor                            ³
+		//³ mv_par08	     	// Lista Comissao Pagas (Sim/Nao/Ambas)      |
+		//³ mv_par09	     	// Abate IR Comissao ?                       ³
+		//³ mv_par10	     	// Abate Impostos    ?                       ³
+		//³ mv_par11 	    	// Do Cliente                                ³
+		//³ mv_par12	     	// ao Cliente                                ³
+		//³ mv_par13 	    	// Da Loja                                   ³
+		//³ mv_par14 	    	// a Loja                                    ³
+		//³ mv_par15 	    	// Da Filial                                 ³
+		//³ mv_par16	     	// a Filial                                  ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+		cQuery := "SELECT * "
+		cQuery += " FROM "+RetSqlName("SE3")+" (NOLOCK)  SE3"
+	  	cQuery += " WHERE SE3.E3_VEND >= '"  + mv_par06 + "' AND SE3.E3_VEND <= '"  + mv_par07 + "' AND " 
+
+		If !Empty(mv_par02)
+		   cQuery += "	SE3.E3_EMISSAO >= '" + Dtos(mv_par02) + "' AND SE3.E3_EMISSAO <= '" + Dtos(mv_par03) + "' AND "
+      Endif
+
+      If !Empty(MV_PAR04) 
+		   cQuery += "	SE3.E3_VENCTO >=  '" + Dtos(mv_par04) + "' AND SE3.E3_VENCTO  <= '" + Dtos(mv_par05) + "' AND "
+      Endif
+
+		If mv_par08 == 2 		 // Comissoes a pagar
+			cQuery += "SE3.E3_DATA = '" + Dtos(Ctod("")) + "' AND "
+		ElseIf mv_par08 == 1  // Comissoes pagas
+  			cQuery += "SE3.E3_DATA <> '" + Dtos(Ctod("")) + "' AND "
+		Endif 
+
+		cQuery += "SE3.E3_CODCLI >= '" + mv_par11 + "' AND "
+		cQuery += "SE3.E3_CODCLI <= '" + mv_par12 + "' AND "
+
+		cQuery += "SE3.E3_LOJA   >= '" + mv_par13 + "' AND "
+		cQuery += "SE3.E3_LOJA   <= '" + mv_par14 + "' AND "
+
+		cQuery += "SE3.E3_FILIAL >= '" + mv_par15 + "' AND "
+		cQuery += "SE3.E3_FILIAL <= '" + mv_par16 + "' AND "
+
+		cQuery += "D_E_L_E_T_ <> '*' "   
+		cQuery += " ORDER BY E3_VEND,E3_EMISSAO "   
+
+
+ 	   MemoWrit("MTR540.Sql",cQuery)   //   Apenas utilizado para validar a query.
+
+
+		cQuery := ChangeQuery(cQuery)
+											
+
+		dbSelectArea("SE3")
+		dbCloseArea()
+		dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), 'SE3', .F., .T.)
+			
+		For ni := 1 to Len(aStru)
+			If aStru[ni,2] != 'C'.and. alltrim(aStru[ni][1])$cQuery
+				TCSetField('SE3', aStru[ni,1], aStru[ni,2],aStru[ni,3],aStru[ni,4])
+			Endif
+		Next 
+	Else
+	
+#ENDIF	
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Cria arquivo de trabalho                                     ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		cChave := IndexKey()
+		cNomArq :=CriaTrab("",.F.)
+		IndRegua("SE3",cNomArq,cChave,,cCondicao, OemToAnsi(STR0016)) //"Selecionando Registros..."
+		nIndex := RetIndex("SE3")
+		DbSelectArea("SE3") 
+		DbSetIndex(cNomArq+OrdBagExT())
+		DbSetOrder(nIndex+1)
+
+#IFDEF TOP
+	EndIf
+#ENDIF	
+
+SetRegua(RecCount())		// Total de Elementos da regua
+DbGotop()
+While !Eof()
+	IF lEnd
+		@Prow()+1,001 PSAY OemToAnsi(STR0011)  //"CANCELADO PELO OPERADOR"
+		lContinua := .F.
+		Exit
+	EndIF
+	IncRegua()
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Processa condicao do filtro do usuario                       ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If ! Eval(cFiltroUsu)
+		Dbskip()
+		Loop
+	Endif
+	
+	nBdia   := nCtot :=   nTtot := 0
+	
+	nAVen  := 0
+	nAIrr  := 0
+
+	nTtot  := 0  // Total dos Titulos (Somatoria do valor dos Titulos)
+	nCTot  := 0
+
+	nBtot  := 0  // Base do Registro (Sem Adiantametno, Sem Devulucao)
+	nBdia  := 0  // Base do Registro (Somente Adiantamento)
+	nBDev  := 0  // Base do Registro (Somente Devolucao)
+
+	nCtot  := 0  // Base do Registro (Sem Adiantametno, Sem Devulucao)
+	nCdia  := 0  // Base do Registro (Somente Adianamento)
+	nCDev  := 0  // Base do Registro (Somente Devolucao)
+	
+	lFirstV:= .T.
+	cVend  := SE3->E3_VEND
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Considera apenas os Vendedores Internos³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	dbSelectArea("SA3")
+	dbSeek(xFilial()+SE3->E3_VEND)
+	
+	If MV_PAR01 = 1         // Interno
+		If !SA3->A3_TIPO = "I"
+			dbSelectArea("SE3")
+			dbSkip()
+			loop
+		Endif
+	Elseif  MV_PAR01 = 2     // Externo
+		If !SA3->A3_TIPO = "E"
+			dbSelectArea("SE3")
+			dbSkip()
+			loop
+		Endif
+	Elseif  MV_PAR01 = 3     // Extra
+		If !SA3->A3_TIPO = " "
+			dbSelectArea("SE3")
+			dbSkip()
+			loop
+		Endif
+	Endif
+	
+	While !Eof() .AND. SE3->E3_VEND == cVend
+		IncRegua()
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Processa condicao do filtro do usuario                       ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If ! Eval(cFiltroUsu)
+			Dbskip()
+			Loop
+		Endif
+		
+		If li > 55
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		EndIF
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³ Seleciona o Codigo do Vendedor e Imprime o seu Nome          ³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		IF lFirstV
+			dbSelectArea("SA3")
+			dbSeek(xFilial()+SE3->E3_VEND)
+			@li, 00 PSAY OemToAnsi(STR0012) + SE3->E3_VEND + " " + A3_NOME //"Vendedor : "
+			li+=2
+			dbSelectArea("SE3")
+			lFirstV := .F.
+			dbSelectArea("SE3")
+		EndIF
+
+		
+		@li, 00 PSAY SE3->E3_PREFIXO
+		@li, 04 PSAY SE3->E3_NUM
+		@li, 15 PSAY SE3->E3_PARCELA
+		@li, 19 PSAY SE3->E3_CODCLI
+		@li, 30 PSAY SE3->E3_LOJA
+		
+		dbSelectArea("SA1")
+		dbSeek(SE3->E3_FILIAL+SE3->E3_CODCLI+SE3->E3_LOJA)
+		@li, 037  PSAY Substr(A1_NOME,1,35)
+             
+        /*
+	    dbSelectArea("SD2")
+	    dbSetorder(3)
+	    If DbSeek(SE3->E3_FILIAL+SE3->E3_NUM)
+	       dbSelectArea("SC5")
+	       dbSetorder(1)
+		   If DbSeek(SD2->D2_FILIAL+SD2->D2_PEDIDO)
+		      cCodCli:=SC5->C5_X_COTCL
+		   Else
+		      cCodCli:=""
+		   Endif
+		Endif
+		@li, 083 PSAY cCodCli
+        */
+		
+		dbSelectArea("SE1")
+		dbSetOrder(1)
+		dbSeek(SE3->E3_Filial+SE3->E3_PREFIXO+SE3->E3_NUM+SE3->E3_PARCELA+SE3->E3_TIPO)
+		nVlrTitulo := Round(xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,1/*MV_PAR08*/,SE1->E1_EMISSAO,nDecs+1),nDecs)
+		dVencto    := SE1->E1_VENCTO
+		
+		nBasePrt	:=	Round(xMoeda(SE3->E3_BASE ,1,1/*MV_PAR08*/,SE1->E1_EMISSAO,nDecs+1),nDecs)
+		nComPrt	    :=	Round(xMoeda(SE3->E3_COMIS,1,1/*MV_PAR08*/,SE1->E1_EMISSAO,nDecs+1),4)
+
+		@li, 083 PSAY SE1->E1_EMISSAO
+		
+		dbSelectArea("SE3")
+		@li, 105 PSAY SE3->E3_EMISSAO
+		@ li,118 PSAY SE3->E3_VENCTO
+		@ li,128 PSAY SE3->E3_DATA
+		@ li,137 PSAY nBasePrt 			Picture tm(nBasePrt,14,nDecs)
+		@ li,155 PSAY SE3->E3_PORC		Picture tm(SE3->E3_PORC,6)
+		@ li,161 PSAY nComPrt			Picture tm(nComPrt,14,4)
+		@ li,181 PSAY SE3->E3_BAIEMI
+		@ li,191 PSAY SE3->E3_FILIAL   //Filial de Origem da Comissao.
+		
+		//If ( SE3->E3_AJUSTE == "S" .And. MV_PAR07==1)
+		//	@ li,208 PSAY "AJUSTE"
+		//EndIf
+		
+		nCTot += nComPrt
+		nBTot += nBasePrt
+		
+		nTtot += nVlrTitulo  // Valor da Titulo
+
+		If nComPrt < 0
+			if SE3->E3_CODCLI = "000001"
+				nCdia += nComPrt   // Adiantamento (Valor Comissao )
+    			nBdia += nBasePrt  // Adiantamento (Valor Base )
+   			Else
+				nCDev += nComPrt   // Devolucoes ( Valor Comissao )
+				nBDev += nBasePrt  // Devolucoes ( Valor Base )
+			Endif
+		Endif
+		
+		li++
+		dbSkip()
+		
+	EndDo
+	
+	
+	
+	If (nBdia+nCtot+nTtot) != 0
+		li++
+		
+		If li > 55
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		EndIF
+		
+		@ li,00  PSAY "Observacao : "+SA3->A3_X_OBS1+" "+SA3->A3_X_OBS2+" "+SA3->A3_X_OBS3
+		li++
+		li++
+		
+		@li,  00 PSAY  "VALOR COMISSAO TOTAL BRUTO       --> "
+    	@li, 137 PSAY nBtot+ABS(nBDev)+ABS(nBdia) Picture tm(nBtot+ABS(nBDev)+ABS(nBdia),15,4)
+		If  nBtot+ABS(nBDev)+ABS(nBdia) != 0
+			@ li, 155 PSAY ( (nCtot+ABS(nCDev)+ABS(nCdia)) / (nBtot+ABS(nBDev)+ABS(nBdia)))*100   PicTure "999.99"
+		Endif
+		@li, 161 PSAY nCtot+ABS(nCDev)+ABS(nCdia) Picture tm(nCtot+ABS(nCDev)+ABS(nCdia),15,4)
+		li ++
+		
+		@li,  00 PSAY  "               (-) DEVOLUCOES    --> "
+    	@li, 137 PSAY nBDev Picture tm(nBDev,15,4)
+		@li, 161 PSAY nCDev Picture tm(nCDev,15,4)
+		li ++
+
+
+		lIrrf:= Iif(MV_PAR09 > 0 .And. ((nCtot+ABS(nCDev)+ABS(nCdia) + nCDev ) * MV_PAR09 / 100) > GetMV("MV_VLRETIR"),.T.,.F.) 
+        lImp := Iif(MV_PAR10 > 0, .T. , .F. )
+	
+		nIrrf:= 0
+        nImp := 0
+          
+        If lIrrf .or. lImp
+			@li,  00 PSAY  "SUBTOTAL COMISSAO (GERAR NF)     --> "
+	    	//@li, 137 PSAY (nBtot+ABS(nBDev)+ABS(nBdia) + nBDev ) Picture tm((nBtot+ABS(nBDev)+ABS(nBdia) + nBDev ),15,4)
+    		@li, 161 PSAY (nCtot+ABS(nCDev)+ABS(nCdia) + nCDev ) Picture tm((nCtot+ABS(nCDev)+ABS(nCdia) + nCDev ),15,4)
+			li ++
+	   Endif
+			
+		If lIrrf
+			nIrrf := ((nCtot+ABS(nCDev)+ABS(nCdia) + nCDev ) * mv_par09 / 100) * -1
+			@ li, 00  PSAY "               (-) IRRF          --> "
+        	@ li, 155 PSAY mv_par09 	Picture "999.99"
+			@ li, 161  PSAY nIrrf PicTure tm(nIrrf,15,4)
+ 		   li ++
+		EndIf
+
+		If lImp
+			nImp := ((nCtot+ABS(nCDev)+ABS(nCdia) + nCDev ) * mv_par10 / 100) * -1
+			@ li, 00  PSAY "               (-) IMPOSTOS      --> "
+        	@ li, 155 PSAY mv_par10 	Picture "999.99"
+			@ li, 161  PSAY nImp PicTure tm(nIrrf,15,4)
+ 		   li ++
+		EndIf
+
+    	@li,  00 PSAY  "               (-) ADIANTAMENTOS --> "
+    	@li, 137 PSAY nBdia Picture tm(nBdia,15,4)
+		@li, 161 PSAY nCdia Picture tm(nCdia,15,4)
+		li ++
+
+		@ li, 00  PSAY "SALDO A RECEBER                  --> "
+		@ li, 161  PSAY (nCtot+ABS(nCDev)+ABS(nCdia) + nCDev ) + nIrrf + nCdia + nImp PicTure tm(nCtot,15,4)
+		li++
+		
+		
+		@ li, 00  PSAY __PrtThinLine()
+		
+		//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+		//³Controla se imprime Vendedor por pagina³
+		//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+		If nVendPag == 1
+			
+			li +=5
+			If li > 55
+				cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+			EndIF
+			@ li,80 PSAY Replicate("-",20)
+			li ++
+			@ li,86 PSAY "CIENTE"
+			li := 60
+		Else
+			li +=2
+		Endif
+		
+	EndIF
+	
+	dbSelectArea("SE3")
+
+	nGTtot += nTtot // Total dos Titulos (Somatoria do valor dos Titulos)
+
+	nGBtot += nBtot   // Total de Base      (Sem Adiantametno, Sem Devulucao)
+	nGBdia += nBdia   // Total de Base      (Somente Adiantamento)
+	nGBDev += nBDev   // Total de Base      (Somente Devolucao)
+
+	nGCtot += nCtot   // Total de Comissao  (Sem Adiantametno, Sem Devulucao)
+	nGCdia += nCdia   // Tital de Comissao  (Somente Adianamento)
+	nGCDev += nCDev   // Total de Comissao  (Somente Devolucao)
+	
+EndDo
+
+IF (nGBdia+nGCtot+nGTtot) != 0  // Total Geral de  (Base de Adiatamento + Total de Comissao + Total de Titulos)
+	
+	If nVendPag == 1
+		cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+	Else
+		If li > 55
+			cabec(titulo,cabec1,cabec2,nomeprog,tamanho,nTipo)
+		Else
+			@ li, 00  PSAY __PrtThinLine()
+			li := li +2
+		Endif
+	Endif
+	
+	
+	@li,  00 PSAY  "VALOR COMISSAO TOTAL BRUTO       --> "
+	@li, 137 PSAY nGBtot+ABS(nGBDev)+ABS(nGBdia) Picture tm(nGBtot+ABS(nGBDev)+ABS(nGBdia),15,4)
+	@li, 155 PSAY ((nGCtot+ABS(nGCDev)+ABS(nGCdia)) / (nGBtot+ABS(nGBDev)+ABS(nGBdia)) ) *100 	picture "999.99"
+	@li, 161 PSAY nGCtot+ABS(nGCDev)+ABS(nGCdia) Picture tm(nGCtot+ABS(nGCDev)+ABS(nGCdia),15,4)
+	li ++
+	
+
+	@li,  00 PSAY  "               (-) DEVOLUCOES    --> "
+	@li, 137 PSAY nGBDev Picture tm(nBDev,15,4)
+	@li, 161 PSAY nGCDev Picture tm(nCDev,15,4)
+	li ++
+	
+	
+	lIrrf:= Iif(MV_PAR09 > 0 .And. ((nGCtot+ABS(nGCDev)+ABS(nGCdia) + nGCDev) * MV_PAR09 / 100) > GetMV("MV_VLRETIR"),.T.,.F.)
+	lImp := Iif(MV_PAR10 > 0, .T. , .F. )
+	
+	nIrrf:= 0
+	nImp := 0
+	
+	If lIrrf .or. lImp
+		@li,  00 PSAY  "SUBTOTAL COMISSAO (GERAR NF)     --> "
+		//@li, 137 PSAY ((nGBtot+ABS(nGBDev)+ABS(nGBdia) + nGBDev)) Picture tm((nGBtot+ABS(nGBDev)+ABS(nGBdia) + nGBDev),15,4)
+		@li, 161 PSAY ((nGCtot+ABS(nGCDev)+ABS(nGCdia) + nGCDev)) Picture tm((nGCtot+ABS(nGCDev)+ABS(nGCdia) + nGCDev),15,4)
+		li ++
+	Endif
+	
+	If lIrrf
+		nIrrf := ((nGCtot+ABS(nGCDev)+ABS(nGCdia) + nGCDev) * mv_par09 / 100) * -1
+		@ li, 00  PSAY "               (-) IRRF          --> "
+     	@ li, 155 PSAY mv_par09 	Picture "999.99"
+		@ li, 161 PSAY nIrrf PicTure tm(nIrrf,15,4)
+		li ++
+	EndIf
+	
+	If lImp
+		nImp :=  ((nGCtot+ABS(nGCDev)+ABS(nGCdia) + nGCDev) * mv_par10 / 100) * -1
+		@ li, 00  PSAY "               (-) IMPOSTOS      --> "
+   	    @ li, 155 PSAY mv_par10 	Picture "999.99"
+		@ li, 161  PSAY nImp PicTure tm(nImp,15,4)
+		li ++
+	EndIf
+	
+	
+	@li,  00 PSAY  "               (-) ADIANTAMENTOS --> "
+	@li, 137 PSAY nGBdia Picture tm(nGBdia,15,4)
+	@li, 161 PSAY nGBdia Picture tm(nGBdia,15,4)
+	li ++
+	
+	
+	@ li, 00  PSAY "SALDO A RECEBER                  --> "
+	@ li, 161  PSAY ((nGCtot+ABS(nGCDev)+ABS(nGCdia) + nGCDev) + nIrrf + nGCdia + nImp ) PicTure tm(nCtot,15,4)
+	li++
+	
+	
+	roda(cbcont,cbtxt,"G")
+	
+EndIF
+    
+#IFDEF TOP
+	If TcSrvType() != "AS/400"
+  		dbSelectArea("SE3")
+		DbCloseArea()
+		chkfile("SE3")
+	Else	
+#ENDIF
+		fErase(cNomArq+OrdBagExt())
+#IFDEF TOP
+	Endif
+#ENDIF
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Restaura a integridade dos dados                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+RestArea(_aAreaE3)
+RestArea(_aAreaAt)
+
+/*
+DbSelectArea("SE3")
+RetIndex("SE3")
+DbSetOrder(1)
+Set Filter To
+*/
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Se em disco, desvia para Spool                               ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+If aReturn[5] = 1
+	Set Printer To
+	dbCommitAll()
+	ourspool(wnrel)
+Endif
+
+MS_FLUSH()
+
+
+
+User Function VlVend(nOption,cVendedor) 
+Local lRet:= .T.            
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Considera apenas os Vendedores Internos³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SA3")
+If dbSeek(xFilial()+cVendedor)
+	
+	if nOption = 1
+		If !SA3->A3_TIPO = "I"
+			Aviso("ATENCAO", "O Vendedor selecionado nao e Interno.",{"&Ok"})
+			lRet:=.f.
+		Endif
+	ElseIf nOption = 2             // Externo
+		If !SA3->A3_TIPO = "E"
+			Aviso("ATENCAO", "O Vendedor selecionado nao e Externo.",{"&Ok"})
+			lRet:=.f.
+		Endif
+	Endif
+	
+Endif
+
+Return(lRet)
+
+                            
+		/*
+		Nas comissoes geradas por baixa pego a data da emissao da comissao que eh igual a data da baixa do titulo.
+		Isto somente dara diferenca nas baixas parciais
+		*/
+		
+		//If SE3->E3_BAIEMI == "B"
+		//	dBaixa     := SE3->E3_EMISSAO
+		//Else
+		//	dBaixa     := SE1->E1_BAIXA
+		//Endif
+		
+		//If Eof()
+		//   dbSelectArea("SF2")
+		//   dbSetorder(1)
+		//   dbSeek(SE3->E3_FILIAL+SE3->E3_NUM+SE3->E3_PREFIXO)
+		//	If ( cPaisLoc=="BRA" )
+		//		nVlrTitulo := Round(xMoeda(F2_VALMERC+F2_VALIPI+F2_FRETE+F2_SEGURO,1,1/*mv_par08*/,SF2->F2_EMISSAO,nDecs+1),nDecs)
+		//	Else
+		//		nVlrTitulo := Round(xMoeda(F2_VALFAT,SF2->F2_MOEDA,1/*mv_par08*/,SF2->F2_EMISSAO,nDecs+1,SF2->F2_TXMOEDA),nDecs)
+		//	Endif
+		//		dVencto    := " "
+		//	dBaixa     := " "
+		//
+		//	If Eof()
+		//		nVlrTitulo := 0
+		//			dbSelectArea("SE1")
+		//			dbSetOrder(1)
+		//			cFilialSE1 := SE3->E3_FILIAL
+		//			dbSeek(cFilialSE1+SE3->E3_PREFIXO+SE3->E3_NUM)
+		//			While ( !Eof() .And. SE3->E3_PREFIXO == SE1->E1_PREFIXO .And.;
+		//					SE3->E3_NUM == SE1->E1_NUM .And.;
+		//					SE3->E3_FILIAL == cFilialSE1 )
+		//				If ( SE1->E1_TIPO == SE3->E3_TIPO  .And. ;
+		//						SE1->E1_CLIENTE == SE3->E3_CODCLI .And. ;
+		//						SE1->E1_LOJA == SE3->E3_LOJA )
+		//					nVlrTitulo += Round(xMoeda(SE1->E1_VALOR,SE1->E1_MOEDA,1/*MV_PAR08*/,SE1->E1_EMISSAO,nDecs+1),nDecs)
+		//					dVencto    := " "
+		//					dBaixa     := " "
+		//				EndIf
+		//				dbSelectArea("SE1")
+		//				dbSkip()
+		//			EndDo
+		//			EndIf
+		//	Endif
+		//Preciso destes valores para pasar como parametro na funcao TM(), e como
+		//usando a xmoeda direto na impressao afetaria a performance (deveria executar
+		//duas vezes, uma para imprimir e outra para pasar para a picture), elas devem]
+		//ser inicializadas aqui. Bruno.
+		

@@ -1,0 +1,39 @@
+#include "rwmake.ch"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡„o    ³Mpl_GDESC | Autor ³ Almeida                ³ Data ³ 16/09/04 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡„o ³ Concatena REFERENCIA+SUFIXO+MARCA+ORIGEM  GATILHO           ³±±
+±±³          ³                                                             |±±
+±±³          ³ Funcao chamada do Cadastro de Produtos (SB1)                |±±
+±±³          ³                                                             |±±
+±±³          ³ Deve ser incluida no Valide dos seguintes campos            |±±
+±±³          ³ B1_X_REFER / B1_X_SUFIX / B1_X_MARCA / B1_ORIGEM            |±±
+±±³          ³ Gatilho Cadastro de Produtos                                |±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Uso       ³ MULTI-TEK                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+User Function MPL_GDESC()
+
+Local cConc    := ""
+Local aGetArea := GetArea()
+
+DbSelectArea("SB1")
+DbSetOrder(1)
+Dbseek(xFilial("SB1")+M->B1_COD)
+
+cConc:=  Alltrim(M->B1_X_REFER) + Alltrim(M->B1_X_SUFIX)+" "+Alltrim(M->B1_X_MARCA) 
+//+ Alltrim(M->B1_ORIGEM)  
+                      
+              
+              
+RestArea(aGetArea)   
+
+Return(cConc)
+

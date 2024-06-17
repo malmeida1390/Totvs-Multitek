@@ -1,0 +1,40 @@
+/*
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÉÍÍÍÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍËÍÍÍÍÍÍÑÍÍÍÍÍÍÍÍÍÍÍÍÍ»±±
+±±ºPrograma  ³ImgTMP    ºAutor  ³Sandro Valex        º Data ³  19/06/01   º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÊÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºDesc.     ³Ponto de entrada referente a imagem de identificacao da     º±±
+±±º          ³etiqueta temporaria                                         º±±
+±±ÌÍÍÍÍÍÍÍÍÍÍØÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¹±±
+±±ºUso       ³ AP5                                                        º±±
+±±ÈÍÍÍÍÍÍÍÍÍÍÏÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+User Function ImgTMP // imagem de etiqueta temporaria
+Local cCodigo
+While .t.
+	cCodigo := Padr(CBProxCod('MV_CODCB0'),10)
+	If ! CB0->(DbSeek(xFilial()+cCodigo))
+		exit
+	EndIf
+End
+
+_nEtqL := 4
+_nEtqC := 4
+//MSCBLOADGRF("MTK.GRF") // So nas etiquetas de produto
+MSCBBEGIN(1,6)
+// Lado esquerdo
+MSCBBOX(01+_nEtqC,05+_nEtqL,41+_nEtqC,05+_nEtqL)
+MSCBBOX(01+_nEtqC,13+_nEtqL,41+_nEtqC,13+_nEtqL)
+// MSCBGRAFIC(01+_nEtqC,01+_nEtqL,"MTK") // So nas etiquetas de produto
+MSCBSAY(01+_nEtqC,01+_nEtqL,"TEMPORARIA","N","0","030,030")
+MSCBSAY(20+_nEtqC,01+_nEtqL,"", "N", "0", "030,030")
+MSCBSAY(01+_nEtqC,07+_nEtqL,"","N","0","020,035",.T.)
+MSCBSAY(01+_nEtqC,10+_nEtqL,"","N","0","020,035",.T.)
+MSCBSAYBAR(03+_nEtqC,15+_nEtqL,cCodigo,"N","MB07",7,.F.,.T.,.F.,,2,2,.F.,.F.,"1",.T.) 
+MSCBInfoEti("Etiq.Temporaria","30X100")
+MSCBEND()
+
+Return .F.

@@ -1,0 +1,312 @@
+#INCLUDE "MATA530.CH"
+#INCLUDE "PROTHEUS.CH"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATA530A ³ Autor ³ Marcelo Vicente       ³ Data ³ 02/01/98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Informar e Atualizar data de pagamento da comissao dos      ³±±
+±±³          ³Vendedores Interno pois grava SRC                           ³±±
+±±³          ³Na Multirek nao e Utilizada a rotima padrao MATA530         ³±±
+±±³          ³pois pois geramos comissao hora para SE2 atraves da         ³±±
+±±³          ³funcao MT530A e hora para SRC atraves da funcao MT530.      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+User Function MT530A(_DefPag)
+/* Marcelo Vicente - 17/12/04                                         */
+/* Fonte derivado de MATA530                                          */
+/* Principal necessidade: varrer o SE3 independentemente da Filial    */
+/* e Filtrar a Geracao de SE2 exclusivamente para Vendedores Externos */
+/* e GERASE2 ==  Sim                                                  */
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oDlg
+Local cCadastro := OemToAnsi(STR0003) //"Atual. Pag. de Comiss„o     "
+LOCAL nOpca := 0
+LOCAL aCA:={ OemToAnsi(STR0001),OemToAnsi(STR0002)}  //"Confirma"###"Abandona"
+Local aSays:={}, aButtons:={}
+
+PRIVATE aRotina :={	{"","AxPesqui"	,0 , 1},;
+	{"","AxVisual"	,0 , 2},;
+	{"","AxInclui"	,0 , 3},;
+	{"","AxAltera"	,0 , 4},;
+	{"","AxDeleta"	,0 , 5} }  // Somente para contabilizacao
+
+DEFAULT _DefPag := "E"
+
+
+If _DefPag = "E"
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Variaveis utilizadas para parametros                          ³
+	//³ mv_par01        	// Tipo de Vendedor     (EXTERNO)            ³
+	//³ mv_par02        	// Filial               (Ambas)              ³
+	//³ mv_par03        	// Data de Vencimento                        ³
+	//³ mv_par04        	// Data de Pagamento                         ³
+	//³ mv_par05	     	// Vendedor de                               |
+	//³ mv_par06	     	// Ate o Vendedor                            |
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+	Pergunte("MT530A",.F.)
+
+	AADD(aSays,OemToAnsi( STR0004 ) ) //"      Este programa tem como objetivo solicitar e atualizar"
+	AADD(aSays,OemToAnsi( STR0005 ) ) //"a data para pagamento das comiss”es dos Vendedores.        "
+	AADD(aButtons, { 5,.T.,{|| Pergunte("MT530A",.T. ) } } )
+	AADD(aButtons, { 1,.T.,{|o| nOpca:= 1, If( CA530Ok(), o:oWnd:End(), nOpca:=0 ) }} )
+	AADD(aButtons, { 2,.T.,{|o| o:oWnd:End() }} )
+	FormBatch( cCadastro, aSays, aButtons ,,220,380)
+
+   
+Else
+
+
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Variaveis utilizadas para parametros                          ³
+	//³ mv_par01        	// Tipo de Vendedor     (Interno)            ³
+	//³ mv_par02        	// Filial               (Ambas)              ³
+	//³ mv_par03        	// Data de Vencimento                        ³
+	//³ mv_par04        	// Data de Pagamento                         ³
+	//³ mv_par05	     	// Vendedor de                               |
+	//³ mv_par06	     	// Ate o Vendedor                            |
+	//³ mv_par07         // Soma Valores de Comissao Existe           |
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+   Pergunte("MT530I",.F.)
+
+	AADD(aSays,OemToAnsi( STR0004 ) ) //"Este programa tem como objetivo solicitar e atualizar"
+	AADD(aSays,OemToAnsi( STR0005 ) ) //"a data para pagamento das comiss”es dos Vendedores.        "
+	AADD(aButtons, { 5,.T.,{|| Pergunte("MT530I",.T. ) } } )
+	AADD(aButtons, { 1,.T.,{|o| nOpca:= 1, If( CA530Ok(), o:oWnd:End(), nOpca:=0 ) }} )
+	AADD(aButtons, { 2,.T.,{|o| o:oWnd:End() }} )
+	FormBatch( cCadastro, aSays, aButtons ,,220,380)
+
+
+Endif
+
+
+
+
+If SM0->M0_CODIGO <> "01" .OR. SM0->M0_CODFIL <> "01"
+	MsgStop("Esta funcionalidade so pode ser acionada da Matriz.")
+	Return
+EndIf
+
+
+If nOpca == 1
+	Processa({|lEnd| fa530A()})
+Endif
+
+Return(.T.)
+
+
+
+*-----------------------
+Static Function fa530A()
+*------------------------------------
+/* Derivada da Funcao Original de mesmo nome.*/
+
+Local nRegistro := 0
+Local cVendAnt  := ""
+Local nVlrComis := 0
+Local cPrefixo  := ""
+Local cNumero   := ""
+Local cSequencia:= ""
+Local cParcela  := ""
+Local cNatureza := ""
+Local cTipo     := ""
+Local nHdlPrv   := 0
+Local cArquivo  := ""
+Local nTotal    := 0
+Local cPadrao   := "510"
+Local lPadrao   := VerPadrao(cPadrao)
+Local dVencto
+Local lFiltro	 := .T.
+Local cFilterUser := " "
+Local nIrrf	 := 0
+Local nIss	 := 0
+Local nInss	 := 0
+Local nRecCtb := 0
+Local aTps := {}
+Local aParc := {}
+Local nX := 0
+Local _cAlias  := "TABSE3"
+Local aStruSE3 := SE3->(dbStruct())
+Local ni       := 0
+
+
+//-> Acrescentadas
+Local	_cTipo := ""
+Local	_cGeraFin := ""
+
+Private cLote   := ""
+
+LoteCont( "FIN" )
+
+ProcRegua(SE3->(RecCount())) // Regua
+
+
+If TcSrvType() != "AS/400"
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Variaveis utilizadas para parametros                          ³
+	//³ mv_par01        	// Tipo de Vendedor     (Interno)            ³
+	//³ mv_par02        	// Filial               (Ambas)              ³
+	//³ mv_par03        	// Data de Vencimento                        ³
+	//³ mv_par04        	// Data de Pagamento                         ³
+	//³ mv_par05	     	// Vendedor de                               |
+	//³ mv_par06	     	// Ate o Vendedor                            |
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	cQuery := "SELECT * "
+	cQuery += " FROM "+RetSqlName("SE3")+" (NOLOCK) SE3, "+RetSqlName("SA3")+"  (NOLOCK) SA3 "
+	cQuery += " WHERE SE3.E3_VENCTO = '"  + dtos(mv_par03) + "' AND "
+	cQuery += " SA3.A3_COD = SE3.E3_VEND AND "
+	cQuery += "	SE3.E3_VEND >= '" + mv_par05 + "' AND SE3.E3_VEND <= '"  + mv_par06 + "' AND "
+	//cQuery += "	SA3.A3_TIPO = '"+IF(MV_PAR01=1,"E","E")+"' AND "  // Interno/Externo
+	cQuery += " SE3.E3_DATA = '" + Dtos(Ctod("")) + "' AND "	   // Comissoes a pagar
+	cQuery += " SE3.D_E_L_E_T_ <> '*' AND "
+	cQuery += " SA3.D_E_L_E_T_ <> '*' "
+	        
+
+	//MemoWrit("MT530A.Sql",cQuery)   //   Apenas utilizado para validar a query.
+
+	cQuery := ChangeQuery(cQuery)
+	
+	dbSelectArea("SE3")
+	dbCloseArea()
+	dbUseArea(.T., "TOPCONN", TCGenQry(,,cQuery), _cAlias , .F., .T.)
+	
+	For ni := 1 to Len(aStruSE3)
+		If aStruSE3[ni,2] != 'C' .AND. alltrim(aStruSE3[ni][1])$cQuery
+			TCSetField( _cAlias , aStruSE3[ni,1], aStruSE3[ni,2],aStruSE3[ni,3],aStruSE3[ni,4])
+		Endif
+	Next
+
+	
+Endif
+      
+
+
+cVendAnt := (_cAlias)->E3_VEND
+
+While !(_cAlias)->(Eof())
+
+	//SE3->(DbSelectArea("SE3"),DbSetOrder(1),Dbseek((_cAlias)->(E3_FILIAL+E3_PREFIXO+E3_NUM+E3_PARCELA+E3_SEQ+E3_VEND)))
+      
+   DbSelectArea("SE3")
+   Dbgoto((_cAlias)->R_E_C_N_O_)
+
+	RecLock("SE3",.F.)
+	SE3->E3_DATA := mv_par04
+	MsUnLock()
+
+
+   /*	
+
+	If   MV_PAR01=2  // "Pagamento de Internos
+
+            
+  		  _cTipo    := Getadvfval("SA3","A3_TIPO"   ,xFILIAL("SA3")+cVendAnt,1," ") //Tipo do Vend(Ext/Int)
+ 		  _cGeraFin := Getadvfval("SA3","A3_GERASE2",xFILIAL("SA3")+cVendAnt,1," ") //Gera SE2(S/N)
+	 	  _cMatr    := Getadvfval("SA3","A3_X_MATRI",xFILIAL("SA3")+cVendAnt,1," ") //Matricula Funcionario 
+	 	  _cCCust   := Getadvfval("SRA","RA_CC"     ,xFILIAL("SRA")+_cMatr  ,1," ") // Centro de Custo do Func.
+ 
+		  If ( cVendAnt != (_cAlias)->E3_VEND .And. nVlrComis != 0)
+
+				dbSelectArea("SA3")
+				dbSetOrder(1)
+				dbSeek(xFilial("SA3")+cVendAnt,.F.)
+			
+			   If !nVlrComis <= 0
+		        
+		         //ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+					//³Se for Pagto do Vale, calcula 40% do valor da comissao do³
+					//³Periodo. Caso contrario (Folha), considera valor total.  ³
+					//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+			      If _cPd == "800"
+			      	_nVrlPag := (nVlrComis * 40)/100		
+			      Else
+			         _nVrlPag := nVlrComis 
+		         Endif 
+
+			   	dbSelectArea("SRC")
+				   dbSetOrder(1)
+				   dbGotop()
+				   If dbSeek(xFilial("SRC")+Alltrim(_cMatr)+Alltrim(_cPd)) //Grava sempre Filial 01.
+			   	  	RecLock("SRC",.F.)
+				   Else
+			   	   RecLock("SRC",.T.)		
+			   	Endif
+			   
+			   	SRC->RC_FILIAL	:= "01"
+			   	SRC->RC_MAT		:= _cMatr
+			   	SRC->RC_PD		:= _cPd
+				   SRC->RC_TIPO1	:= "V"
+				   SRC->RC_VALOR	:= If(Mv_par07 == 1,Abs(_nVrlPag), SRC->RC_VALOR + Abs(_nVrlPag))
+				   SRC->RC_TIPO2	:= "I"                                       
+				   SRC->RC_HORAS	:= Mv_par02 - Mv_par01
+			   	SRC->RC_CC		:= _cCCust
+			   	SRC->RC_X_ORIGE:= "MT530A"	 
+			   	MsUnlock()
+			   
+			   Endif
+			      
+		  	   nVlrComis := 0
+
+    	   EndIf
+
+   Endif
+   */
+               
+   DbSelectArea(_cAlias)
+
+	(_cAlias)->(Dbskip())
+   
+Enddo
+
+dbSelectArea(_cAlias)
+dbCloseArea()
+	
+Return 
+
+
+Static Function ca530Ok()
+Return (MsgYesNo(OemToAnsi(STR0006),OemToAnsi(STR0007)))  //"Confirma a Atual. Pag. de Comiss„o?"###"Aten‡„o"
+
+
+
+
+
+User Function VlVend2(nOption,cVendedor) 
+Local lRet:= .T.            
+
+// nOption   = MV_PAR01 (1=EXTERNO / 2=INTERNO)
+// cVendedor = MV_PAR05 (INICIO) ou MV_PAR06 (FIM) 
+
+
+If nOption = 1 .and. !(VAL(cVendedor) >= 3000 .AND. VAL(cVendedor) <= 4999)
+
+	Aviso("ATENCAO", "Para vendendores Externos somente sera aceito a faixa de vendedores de 3000 a 4999.",{"&Ok"})
+   lRet:= .f.            
+
+
+ELSEIF nOption = 2  .and. !(VAL(cVendedor) >= 5000 .AND. VAL(cVendedor) <= 5999)
+
+	Aviso("ATENCAO", "Para vendendores Extra somente sera aceito a faixa de vendedores de 5000 a 5999.",{"&Ok"})
+   lRet:= .f.            
+
+ENDIF
+
+
+Return(lRet)
+

@@ -1,0 +1,236 @@
+#INCLUDE "MATA530.CH"
+#INCLUDE "PROTHEUS.CH"
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³ MATA530  ³ Autor ³ Eduardo Riera         ³ Data ³ 02/01/98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Informar e Atualizar data de pagamento da comissao dos      ³±±
+±±³          ³Vendedores Interno pois grava SRC                           ³±±
+±±³          ³Na Multirek nao e Utilizada a rotima padrao MATA530         ³±±
+±±³          ³pois pois geramos comissao hora para SE2 atraves da         ³±±
+±±³          ³funcao MT530A e hora para SRC atraves da funcao MT530.      ³±±
+±±³          ³                                                            ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+/*/
+
+User Function MT530()
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Define Variaveis                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Local oDlg
+Local cCadastro := OemToAnsi(STR0003) //"Atual. Pag. de Comiss„o     "
+LOCAL nOpca := 0
+LOCAL aCA:={ OemToAnsi(STR0001),OemToAnsi(STR0002)}  //"Confirma"###"Abandona"
+Local aSays:={}, aButtons:={}
+
+PRIVATE aRotina :={	{"","AxPesqui"	,0 , 1},;
+{"","AxVisual"	,0 , 2},;
+{"","AxInclui"	,0 , 3},;
+{"","AxAltera"	,0 , 4},;
+{"","AxDeleta"	,0 , 5} }  // Somente para contabilizacao
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³ Variaveis utilizadas para parametros                                                                                                 ³
+//³ mv_par01            // Considera da Data                    Filtra E3_EMISSAO                                                        ³
+//³ mv_par02            // ate dada                             Filtra E3_EMISSAO                                                        ³
+//³ mv_par03            // Do Vendedor                          FILTRA E3_VEND      Independente da Filial                               ³
+//³ mv_par04            // Ate Vendedor                         FILTRA E3_VEND      Independente da Filial                               ³
+//³ mv_par05            // Data de Pagamento                    USO DEPENDE DO MV_PAR08 para preechimento do E3_DATA                     |
+//³                                                             data de Baixa                                                            ³
+//³ mv_par06            // Data do Vencimento                   FILTRA E3_VENCTO                                                         ³
+//³ mv_par07            // Data ate o Vencimento                FILTRA E3_VENCTO                                                         |                       ³
+//³ mv_par08            // Considera Data Vendimento ou paga    DEFINE COMO O E3_DATA (DATA DA BAIXA) SERA GRAVADO COM                   |
+//|                                                             BASE NO MV_PAR05 OU NO E3_VENCTO                                         ³
+//³ mv_par09            // Soma Valores de Comissao Existe      DURANTE A GRAVACAO DO RC_VALOR CASO ENCONTRE O REGISTRO                  |
+//³                                                             PODE GRAVAR O NOVO VALOR, ZERANDO ANTERIOR OU SOMAR MAIS                 |
+//³                                                             O NOVO VALOR                                                             ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+Pergunte("COMFOL",.F.)
+AADD(aSays,"      Este programa tem como objetivo solicitar  e atualizar")
+AADD(aSays,"a data para pagamento das comissoes dos Vendedores")
+AADD(aSays,"Internos, gravando  este  valor  de  comissao  na  tabela")
+AADD(aSays,"SRC-Movto Mensal, no Modulo de Folha de Pagto.")
+AADD(aButtons, { 5,.T.,{|| Pergunte("COMFOL",.T. ) } } )
+AADD(aButtons, { 1,.T.,{|o| nOpca:= 1, If( CA530Ok(), o:oWnd:End(), nOpca:=0 ) }} )
+AADD(aButtons, { 2,.T.,{|o| o:oWnd:End() }} )
+FormBatch( cCadastro, aSays, aButtons ,,220,380)
+
+If nOpca == 1
+	Processa({|lEnd| fa530Processa()})
+Endif
+
+Return(.T.)
+
+/*/
+ÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜÜ
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+±±ÚÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄ¿±±
+±±³Fun‡…o    ³fa530Proce³ Autor ³ Eduardo Riera         ³ Data ³ 02/01/98 ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄ´±±
+±±³Descri‡…o ³Processa                                                    ³±±
+±±ÃÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ´±±
+±±³ Uso      ³ Generico                                                   ³±±
+±±ÀÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ±±
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+ßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßßß
+*/
+
+Static Function fa530Processa()
+
+Local cVendAnt  := ""
+Local nVlrComis := 0
+Local dVencto
+Local _cMatr	:= Space(06)
+Local _cFilial := Space(02)
+Local _cGeraFin	:= Space(01)
+Local _cTipo	:= Space(01)
+Local _cPd		:= Space(03)
+Local _nVrlPag	:= 0
+Local _aAreaAt	:= GetArea()
+
+ProcRegua(SE3->(RecCount())) // Regua
+
+_cPd := If(SUBSTR(Dtoc(Mv_par02),1,2) <= "15","800","027")
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//³Nesta situacao esta sendo utilizado indice especifico pelo ³
+//³campo E3_Vend (Ordem 4, sendo que o campo E3_FILIAL nao faz³
+//³parte desta chave).                                        ³
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dbSelectArea("SE3")
+_aAreaE3 := GetArea()
+DbOrderNickname("SE3VEND")  //E3_VEND+EMISSAO
+SET SOFTSEEK ON
+SE3->(DbSeek(mv_par03+DTOS(Mv_par01),.T.))
+SET SOFTSEEK OFF
+
+While ( !Eof() .And. E3_VEND <= mv_par04 )
+	cVendAnt := SE3->E3_VEND
+
+	IncProc()
+	
+	_cTipo    := Getadvfval("SA3","A3_TIPO",xFILIAL("SA3")+cVendAnt,1," ") //Tipo do Vend(Ext/Int)
+	_cGeraFin := Getadvfval("SA3","A3_GERASE2",xFILIAL("SA3")+cVendAnt,1," ")//Gera SE2(S/N)
+	_cMatr    := Getadvfval("SA3","A3_X_MATRI",xFILIAL("SA3")+cVendAnt,1," ") //Matricula Funcionario
+	_cFilial  := Getadvfval("SA3","A3_X_MATFI",xFILIAL("SA3")+cVendAnt,1," ") //Filial    Funcionario
+	_cCCust	  := Getadvfval("SRA","RA_CC",_cFilial+_cMatr,1," ") // Centro de Custo do Func.
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Filtrar as condicoes selecionadas                            ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	If  SE3->E3_EMISSAO >= mv_par01 .And. SE3->E3_EMISSAO <= mv_par02 .And.;  	
+		SE3->E3_VENCTO  >= mv_par06 .And. SE3->E3_VENCTO  <= mv_par07 .And.;
+	    _cTipo == "I"
+
+
+		//Aviso("ATENCAO", "MEIO  " + SE3->E3_VEND+DTOS(SE3->E3_EMISSAO),{"&Ok"})
+
+		// .and. _cGeraFin == "N"
+	   //SE3->E3_BAIEMI $ "E, " .And.;  //Alterado 05/09/11 - Julio
+		//	_cTipo    := Getadvfval("SA3","A3_TIPO",xFILIAL("SA3")+cVendAnt,1," ") //Tipo do Vend(Ext/Int)
+		// _cGeraFin := Getadvfval("SA3","A3_GERASE2",xFILIAL("SA3")+cVendAnt,1," ")//Gera SE2(S/N)
+		
+		/*
+		If ( SE3->E3_EMISSAO >= mv_par02 .And. SE3->E3_EMISSAO <= mv_par03 .And.;
+		If( mv_par01 == 1, SE3->E3_BAIEMI == "E" , .T. )               .And.;
+		If( mv_par01 == 2, SE3->E3_BAIEMI == "B" , .T. ))              .And.;
+		SE3->E3_VENCTO >= mv_par07 .And. SE3->E3_VENCTO <= mv_par08     .And.;
+		_cTipo == "I" .and. _cGeraFin == "N" //.and. lFiltro
+		*/
+		
+		Begin Transaction
+		dVencto := If( mv_par08 == 1,SE3->E3_VENCTO, mv_par05)
+		RecLock("SE3",.F.)
+		SE3->E3_DATA     := dVencto
+		SE3->E3_X_INTRH  := If(SUBSTR(Dtoc(Mv_par02),1,2) <= "15","1","2")
+		MsUnLock()
+		End Transaction
+		nVlrComis += SE3->E3_COMIS
+	EndIf
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³ Aqui e' gerado a Integracao com SRC - Folha de Pgato.        ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	
+	/*
+	If ( cVendAnt != SE3->E3_VEND .And. nVlrComis != 0)
+	BEGIN TRANSACTION
+	dbSelectArea("SA3")
+	dbSetOrder(1)
+	dbSeek(xFilial("SA3")+cVendAnt,.F.)
+	
+	
+	If SA3->(Found()) .And. SA3->A3_GERASE2 == "N" .And. _cTipo == "I"
+	
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Se Vlr da Comissao for Negativo ou Zero nao grava Registro³
+	//³no SRC-Folha de Pagamento.                                ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If !nVlrComis <= 0
+	
+	//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+	//³Se for Pagto do Vale, calcula 40% do valor da comissao do³
+	//³Periodo. Caso contrario (Folha), considera valor total.  ³
+	//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	If _cPd == "800"
+	_nVrlPag := (nVlrComis * 40)/100
+	Else
+	_nVrlPag := nVlrComis
+	
+	Endif
+	
+	Nao esta sendo mais necessario a geracao em Folha.
+	Comecou a pagar os funcionarios de outra forma.
+	
+	
+	dbSelectArea("SRC")
+	dbSetOrder(1)
+	dbGotop()
+	If dbSeek(_cFilial+Alltrim(_cMatr)+Alltrim(_cPd))
+	RecLock("SRC",.F.)
+	Else
+	RecLock("SRC",.T.)
+	Endif
+	SRC->RC_FILIAL	:= _cFilial
+	SRC->RC_MAT		:= _cMatr
+	SRC->RC_PD		:= _cPd
+	SRC->RC_TIPO1	:= "V"
+	SRC->RC_VALOR	:= If(Mv_par09 == 1,Abs(_nVrlPag), SRC->RC_VALOR + Abs(_nVrlPag))
+	SRC->RC_TIPO2	:= "I"
+	SRC->RC_HORAS	:= Mv_par02 - Mv_par01
+	SRC->RC_CC		:= _cCCust
+	SRC->RC_X_ORIGE:= "MT530"
+	MsUnlock()
+	
+	Endif
+	
+	EndIf
+	
+	END TRANSACTION
+	nVlrComis := 0
+	EndIf
+	*/
+	
+	dbSelectArea("SE3")
+	SE3->(DBSKIP())
+	
+Enddo
+
+RestArea(_aAreaE3)
+RestArea(_aAreaAt)
+
+Return
+
+Static Function ca530Ok()
+Return (MsgYesNo(OemToAnsi(STR0006),OemToAnsi(STR0007)))  //"Confirma a Atual. Pag. de Comiss„o?"###"Aten‡„o"

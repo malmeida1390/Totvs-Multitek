@@ -1,0 +1,30 @@
+#include "rwmake.ch"        
+
+User Function 479val()        
+
+//ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+
+
+
+
+//ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+SetPrvt("_VALOR,")
+
+/// VALOR DO DOCUMENTO  DO CODIGO DE BARRA DA POSICAO 10 A 19, NO ARQUIVO E
+/// DA POSICAO 127 - 139, QUANDO NAO FOR CODIGO DE BARRA VAI O VALOR DO SE2
+/// ja com a nova codificacao.
+
+_Valor :="0000000000000"
+
+IF !Empty(SE2->E2_X_CODBA)
+   If Len(Alltrim(SE2->E2_X_CODBA)) == 44
+       _Valor := Substr(SE2->E2_X_CODBA,10,10)
+   Else
+       _Valor := Substr(SE2->E2_X_CODBA,38,10)
+   EndIf
+
+   _Valor := "000"+_Valor
+endif
+
+Return(_Valor)        
